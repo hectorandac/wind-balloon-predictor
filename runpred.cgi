@@ -51,47 +51,54 @@ def main():
     form = cgi.FieldStorage()
     ini = form_to_ini(form)
 
-    gfs_load_process = subprocess.Popen(
-        (['python', './predict.py', '--cd=./', '--alarm', '-v', '-p1', '-f5', '--latdelta=2', '--londelta=2',
-            '-t {0}'.format(form.getvalue('launch-site:timestamp')),
-            '--lat={0}'.format(form.getvalue('launch-site:latitude')),
-            '--lon={0}'.format(form.getvalue('launch-site:longitude')),
-            'PROGRESS_{0}_{1}_{2}'.format(
-                form.getvalue('launch-site:timestamp'),
-                form.getvalue('launch-site:latitude'),
-                form.getvalue('launch-site:longitude')
-            )
-        ]),
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE
-    )
-    gfs_load_process.wait()
-    print(gfs_load_process.communicate())    
+    if (form.getvalue('target') == 'load'):
+        gfs_load_process = subprocess.Popen(
+            (['python', './predict.py', '--cd=./', '--fork', '--alarm', '-v', '-p1', '-f5', '--latdelta=2', '--londelta=2',
+                '-t {0}'.format(form.getvalue('launch-site:timestamp')),
+                '--lat={0}'.format(form.getvalue('launch-site:latitude')),
+                '--lon={0}'.format(form.getvalue('launch-site:longitude')),
+                'PROGRESS_{0}_{1}_{2}'.format(
+                    form.getvalue('launch-site:timestamp'),
+                    form.getvalue('launch-site:latitude'),
+                    form.getvalue('launch-site:longitude')
+                )
+            ]),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE
+        )
 
-    # Try to wire everything up
-    pred_process = subprocess.Popen(
-     (config.LAND_PRED_APP, '-v', '-i', config.LAND_PRED_DATA),
-     stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-    (output, log) = pred_process.communicate(ini)
+        output_dict = {
+            'log': 'Request sent',
+            'output': 'Done'
+        }
+        output_json = demjson.encode(output_dict)
+        print(output_json)
+    
+    else:
+        # Try to wire everything up
+        pred_process = subprocess.Popen(
+            ([config.LAND_PRED_APP, '-v', '-i', config.LAND_PRED_DATA]),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+        (output, log) = pred_process.communicate(ini)
 
-    parsed_output = []
-    for output_line in output.split('\n'):
-        if len(output_line) == 0:
-            continue
+        parsed_output = []
+        for output_line in output.split('\n'):
+            if len(output_line) == 0:
+                continue
 
-        output_fields = output_line.rstrip().split(',')
-        if len(output_fields) < 2:
-            continue
+            output_fields = output_line.rstrip().split(',')
+            if len(output_fields) < 2:
+                continue
 
-        parsed_output.append(output_fields)
+            parsed_output.append(output_fields)
 
-    output_dict = {
-        'log': filter(lambda x: x.rstrip(), log.split('\n')),
-        'output': parsed_output
-    }
-    output_json = demjson.encode(output_dict)
+        output_dict = {
+            'log': filter(lambda x: x.rstrip(), log.split('\n')),
+            'output': parsed_output
+        }
+        output_json = demjson.encode(output_dict)
 
-    print('Content-Type: application/json\n')
-    print(output_json)
+        print('Content-Type: application/json\n')
+        print(output_json)
 
 
 if __name__ == '__main__':
