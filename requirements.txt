@@ -1,0 +1,4 @@
+Pydap
+numpy
+statsd-client
+simplejson
