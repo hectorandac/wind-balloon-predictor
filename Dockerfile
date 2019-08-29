@@ -13,7 +13,7 @@ WORKDIR /opt/predictor/pred_src
 RUN cmake .
 RUN make
 
-EXPOSE 80
+EXPOSE 8080
 
 WORKDIR /opt/predictor
 CMD python server.py

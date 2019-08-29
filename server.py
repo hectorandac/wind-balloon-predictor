@@ -28,6 +28,6 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         p.stdout.close()
         p.stderr.close()
 
-httpd = BaseHTTPServer.HTTPServer(('', 80), RequestHandler)
+httpd = BaseHTTPServer.HTTPServer(('', 8080), RequestHandler)
 
 httpd.serve_forever()

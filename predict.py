@@ -18,6 +18,9 @@ import shutil
 import bisect
 import simplejson as json
 
+from signal import signal, SIGPIPE, SIG_DFL
+signal(SIGPIPE,SIG_DFL) 
+
 statsd.init_statsd({'STATSD_BUCKET_PREFIX': 'habhub.predictor'})
 
 # We use Pydap from http://pydap.org/.

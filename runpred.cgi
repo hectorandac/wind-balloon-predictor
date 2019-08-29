@@ -10,6 +10,9 @@ import subprocess
 import site
 cgitb.enable()
 
+from signal import signal, SIGPIPE, SIG_DFL
+signal(SIGPIPE,SIG_DFL) 
+
 # Locate the script directory and, hence, the prediction app
 SCRIPT_ROOT = os.path.abspath(os.path.dirname(__file__))
 CONFIG_PATH = os.path.abspath(os.path.join(SCRIPT_ROOT, './'))
@@ -63,7 +66,6 @@ def main():
     )
     gfs_load_process.wait()
     print(gfs_load_process.communicate())    
-
 
     # Try to wire everything up
     pred_process = subprocess.Popen(
