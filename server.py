@@ -1,12 +1,19 @@
-import BaseHTTPServer
-import SimpleHTTPServer
+import http.server
+import requests
+import os
+from urllib.parse import unquote, parse_qs
+import threading
+from socketserver import ThreadingMixIn
 import subprocess
 
-class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class ThreadHTTPServer(ThreadingMixIn, http.server.HTTPServer):
+    "This is an HTTPServer that supports thread-based concurrency."
+
+class RequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
-        length = self.headers.getheader('content-length')
-        content_type = self.headers.getheader('content-type')
+        length = self.headers.get('content-length')
+        content_type = self.headers.get('content-type')
         nbytes = int(length)
         data = self.rfile.read(nbytes)
 
@@ -28,6 +35,7 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         p.stdout.close()
         p.stderr.close()
 
-httpd = BaseHTTPServer.HTTPServer(('', 8080), RequestHandler)
-
-httpd.serve_forever()
+if __name__ == '__main__':
+    server_address = ('', int(os.environ.get('PORT', '3000')))
+    httpd = ThreadHTTPServer(server_address, RequestHandler)
+    httpd.serve_forever()
