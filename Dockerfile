@@ -7,6 +7,7 @@ RUN pip install --upgrade pip
 
 WORKDIR /opt/predictor
 COPY . .
+RUN mkdir gfs
 RUN pip install -r requirements.txt
 
 WORKDIR /opt/predictor/pred_src
