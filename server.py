@@ -11,6 +11,10 @@ class ThreadHTTPServer(ThreadingMixIn, http.server.HTTPServer):
 
 class RequestHandler(http.server.SimpleHTTPRequestHandler):
 
+    def end_headers (self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        http.server.SimpleHTTPRequestHandler.end_headers(self)
+
     def do_POST(self):
         length = self.headers.get('content-length')
         content_type = self.headers.get('content-type')
