@@ -1,9 +1,9 @@
 FROM alpine:3.10.2
 
 RUN apk update
-RUN apk add make cmake clang clang-dev libc-dev linux-headers automake gcc g++ subversion python3-dev glib-dev
-RUN python3 -m ensurepip
-RUN pip3 install --upgrade pip
+RUN apk add make cmake clang clang-dev libc-dev linux-headers automake gcc g++ subversion glib-dev python2-dev
+RUN python2 -m ensurepip
+RUN pip install --upgrade pip
 
 WORKDIR /opt/predictor
 COPY . .
@@ -17,4 +17,4 @@ RUN make
 EXPOSE 5000
 
 WORKDIR /opt/predictor
-CMD python3 server.py
+CMD python server.py

@@ -1,11 +1,17 @@
+import os.path
 from flask import Flask, escape, request, send_from_directory
+from flask_autoindex import AutoIndex
+from environs import Env
 import subprocess
 import demjson
 import requests
 import tempfile
 import json
+env = Env()
+env.read_env() 
 
 app = Flask(__name__)
+AutoIndex(app, browse_root=os.path.curdir)
 
 def form_to_ini(form):
     """Take the form submitted and convert it to an INI file."""
@@ -47,7 +53,7 @@ def import_wind_data():
             )
 
     subprocess.Popen(
-        (['python', './predict.py', '--cd=./', '--fork', '--alarm', '-v', '-p1', '-f5', '--latdelta=2', '--londelta=2',
+        (['python2', './predict.py', '--cd=./', '--fork', '--alarm', '-v', '-p1', '-f5', '--latdelta=2', '--londelta=2',
             '-t {0}'.format(request.form['launch-site:timestamp']),
             '--lat={0}'.format(request.form['launch-site:latitude']),
             '--lon={0}'.format(request.form['launch-site:longitude']),
@@ -79,7 +85,7 @@ def get_prediction():
     pred_process = subprocess.Popen(
         (['./pred_src/pred', '-v', '-i', './gfs/']),
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-    (output, log) = pred_process.communicate(bytes(ini, 'utf-8'))
+    (output, log) = pred_process.communicate(bytes(ini))
 
     parsed_output = []
     for output_line in output.decode('utf-8').split('\n'):
@@ -102,4 +108,4 @@ def get_prediction():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=False, port=env("PORT", 5000), host='0.0.0.0')
