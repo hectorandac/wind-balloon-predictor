@@ -7,11 +7,14 @@ import demjson
 import requests
 import tempfile
 import json
+from flask_cors import CORS
 env = Env()
-env.read_env() 
+env.read_env()
 
 app = Flask(__name__)
+CORS(app)
 AutoIndex(app, browse_root=os.path.curdir)
+
 
 def form_to_ini(form):
     """Take the form submitted and convert it to an INI file."""
@@ -35,30 +38,34 @@ def form_to_ini(form):
 
     return ini
 
+
 def dict_to_binary(the_dict):
     str = json.dumps(the_dict)
     binary = ' '.join(format(ord(letter), 'b') for letter in str)
     return binary
 
+
 @app.route('/status/<string:target>')
 def show_target(target):
     return send_from_directory(target, 'progress.json')
 
+
 @app.route('/winddata/pull', methods=['POST'])
 def import_wind_data():
+    requestJson = request.get_json(force=True)
     file_name = 'PROGRESS_{0}_{1}_{2}'.format(
-                request.form['launch-site:timestamp'],
-                request.form['launch-site:latitude'],
-                request.form['launch-site:longitude']
-            )
+                requestJson['launch-site:timestamp'],
+                requestJson['launch-site:latitude'],
+                requestJson['launch-site:longitude']
+    )
 
     subprocess.Popen(
         (['python2', './predict.py', '--cd=./', '--fork', '--alarm', '-v', '-p1', '-f5', '--latdelta=2', '--londelta=2',
-            '-t {0}'.format(request.form['launch-site:timestamp']),
-            '--lat={0}'.format(request.form['launch-site:latitude']),
-            '--lon={0}'.format(request.form['launch-site:longitude']),
+            '-t {0}'.format(requestJson['launch-site:timestamp']),
+            '--lat={0}'.format(requestJson['launch-site:latitude']),
+            '--lon={0}'.format(requestJson['launch-site:longitude']),
             file_name
-        ]),
+          ]),
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE
     )
 
@@ -69,17 +76,19 @@ def import_wind_data():
     output_json = demjson.encode(output_dict)
     return output_json
 
+
 @app.route('/predict', methods=['POST'])
 def get_prediction():
+    requestJson = request.get_json(force=True)
     ini = form_to_ini({
-        'launch-site:latitude': request.form['launch-site:latitude'],
-        'launch-site:longitude': request.form['launch-site:longitude'],
-        'launch-site:altitude': request.form['launch-site:altitude'],
-        'launch-site:timestamp': request.form['launch-site:timestamp'],
-        'atmosphere:wind-error': request.form['atmosphere:wind-error'],
-        'altitude-model:ascent-rate': request.form['altitude-model:ascent-rate'],
-        'altitude-model:descent-rate': request.form['altitude-model:descent-rate'],
-        'altitude-model:burst-altitude': request.form['altitude-model:burst-altitude']
+        'launch-site:latitude': requestJson['launch-site:latitude'],
+        'launch-site:longitude': requestJson['launch-site:longitude'],
+        'launch-site:altitude': requestJson['launch-site:altitude'],
+        'launch-site:timestamp': requestJson['launch-site:timestamp'],
+        'atmosphere:wind-error': requestJson['atmosphere:wind-error'],
+        'altitude-model:ascent-rate': requestJson['altitude-model:ascent-rate'],
+        'altitude-model:descent-rate': requestJson['altitude-model:descent-rate'],
+        'altitude-model:burst-altitude': requestJson['altitude-model:burst-altitude']
     })
 
     pred_process = subprocess.Popen(
@@ -103,7 +112,7 @@ def get_prediction():
         'output': parsed_output
     }
     output_json = demjson.encode(output_dict)
-        
+
     return output_json
 
 
