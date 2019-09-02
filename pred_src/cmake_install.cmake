@@ -1,4 +1,4 @@
-# Install script for directory: /home/hacosta/Documents/Projects/predictor/pred_src
+# Install script for directory: /home/hacosta/Documents/Projects/predictor/wind-predictor/pred_src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/hacosta/Documents/Projects/predictor/pred_src/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/hacosta/Documents/Projects/predictor/wind-predictor/pred_src/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
