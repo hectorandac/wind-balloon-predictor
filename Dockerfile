@@ -14,7 +14,7 @@ WORKDIR /opt/predictor/pred_src
 RUN cmake .
 RUN make
 
-EXPOSE 3000
+EXPOSE 5000
 
 WORKDIR /opt/predictor
 CMD python3 server.py
